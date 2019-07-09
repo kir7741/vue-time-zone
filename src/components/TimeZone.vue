@@ -2,20 +2,82 @@
   <div class="box">
     <h1 class="title">world clock</h1>
     <ul>
-      <li>
+      <li 
+        v-for="timeZone in timeZoneList"
+        :key="timeZone.city"
+      >
         <div class="date">
-          <p>new york</p>
-          <p>27 JAN 2019</p>
+          <p>
+            {{ timeZone.city }}
+          </p>
+          <p>
+            {{ timeZone.date }} {{ timeZone.month }} {{ timeZone.year }}
+          </p>
         </div>
-        <div class="time">02:46</div>
+        <div class="time">
+          {{ timeZone.time }}
+        </div>
       </li>
     </ul>
   </div>
 </template>
 
 <script>
+const timeZones = [
+  { id: 'new york', name: 'America/New_York' },
+  { id: 'london', name: 'Europe/London' },
+  { id: 'bangkok', name: 'Asia/Bangkok' },
+  { id: 'taiwan', name: 'Asia/Taipei' },
+  { id: 'sydney', name: 'Australia/Sydney' }
+];
 export default {
   name: 'TimeZone',
+  data() {
+    return {
+      timer: null,
+      timeZoneList: []
+    }
+  },
+  methods: {
+    getLocaleTime() {
+
+      this.timeZoneList = timeZones.map((timeZone) => {
+
+        const localeDate = new Date().toLocaleString('en-us', { 
+          hour12: false, 
+          timeZone: timeZone.name,
+          year: 'numeric',
+          month: 'short',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+        });
+
+        return {
+          city: timeZone.id,
+          year: localeDate.split(',')[1].trim(),
+          month: localeDate.split(',')[0].split(' ')[0].trim(),
+          date: localeDate.split(',')[0].split(' ')[1].trim(),
+          time: localeDate.split(',')[2].trim()
+        }
+
+      });
+
+    }
+  },
+  mounted() {
+    this.timer = setInterval(() => {
+      this.getLocaleTime();
+    }, 1000);
+  },
+  destroyed() {
+    
+    if (this.timer) {
+      clearInterval((this.timer));
+      this.timer = null;
+    }
+
+  },
 }
 </script>
 
@@ -36,11 +98,14 @@ export default {
 }
 ul {
   margin: 0;
+  border-right: 2px solid #000000;
+  border-left: 2px solid #000000;
   padding: 0;
   list-style: none;
   li {
     display: flex;
     align-items: center;
+    border-bottom: 2px solid #000000;
     padding: 14px 20px;
     background-color: #ffffff;
     & > div {
